@@ -1,0 +1,43 @@
+---
+Author: "Alex, Goajun, Sergey, Bastien"
+---
+
+<br>
+
+###Background
+We have performed analysis of electricity data provided by the French Distribution Network (RTE)
+
+####Analysis
+1. Comparison between supply and demand
+2. Evolution of energy mix
+3. Correlation between time of the day and solar energy production 
+4. Correlation between time of the day and wind energy
+5. Correlation between supply and demand vs. import/export
+6. Correlation between consumption and weather
+
+####Source
+
+Open data: https://www.data.gouv.fr/fr/datasets/electricite-consommation-production-co2-et-echanges/ 
+
+###Part I: Comparison between supply and demand
+
+####Bastien
+
+###Part II: Evolution of energy mix
+
+####??
+
+###Part III: Correlation between time of the day and solar energy production
+
+####??
+
+###Part IV: Correlation between time of the day and wind energy
+
+####??
+
+###Part V: Correlation between supply and demand vs. import/export
+
+####??
+
+###Part VI: Correlation between consumption and weather
+
