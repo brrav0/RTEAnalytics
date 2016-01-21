@@ -42,6 +42,5 @@ Test for Gaojun
 ####??
 
 ###Part VI: Correlation between consumption and weather
-install.packages("rwunderground")
-library("rwunderground")
-set_api_key("f4cd327b844e017a")
+
+#test de push by ALex
