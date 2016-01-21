@@ -33,7 +33,7 @@ Test for Gaojun
 
 ####??
 
-###Part IV: Correlation between time of the day and wind energy
+###Part IV: Correlation between time of the day and wind energy (test Sergey)
 
 ####??
 
@@ -43,3 +43,8 @@ Test for Gaojun
 
 ###Part VI: Correlation between consumption and weather
 
+Test for Alex
+=======
+#test de push by ALex
+
+Test for Bastien 4:35pm
