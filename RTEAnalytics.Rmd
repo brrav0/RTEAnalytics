@@ -43,4 +43,8 @@ Test for Gaojun
 
 ###Part VI: Correlation between consumption and weather
 
+<<<<<<< HEAD
+Test for Alex
+=======
 #test de push by ALex
+>>>>>>> 667cb9c529a834044ee9df40799abceec5c33d42
