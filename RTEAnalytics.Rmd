@@ -49,11 +49,11 @@ Year <- as.Date(DataSet$Date, format = "%m%d%%Y")
 Month <- as.Date(DataSet$Date, format = "%m%d%%Y")
 Day <- as.Date(DataSet$Date, format = "%m%d%%Y")
 
-cor_solar_year <- cor(Year, DataSet$Solar)
-cor_solar_month <- cor(Month, DataSet$Solar)
-cor_solar_day <- cor(Day, DataSet$Solar)
+##cor_solar_year <- cor(Year, DataSet$Solar)
+##cor_solar_month <- cor(Month, DataSet$Solar)
+##cor_solar_day <- cor(Day, DataSet$Solar)
 
-cor_solar_time <- cor(DataSet$Time, DataSet$Solar)  
+##cor_solar_time <- cor(DataSet$Time, DataSet$Solar)  
 ### need to transform the format of Date and Time
 
 plot(DataSet$Date, DataSet$Solar)
