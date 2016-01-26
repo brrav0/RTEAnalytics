@@ -20,10 +20,13 @@ We have performed analysis of electricity data provided by the French Distributi
 Open data: https://www.data.gouv.fr/fr/datasets/electricite-consommation-production-co2-et-echanges/ 
 
 ###Part I: Comparison between supply and demand
+`r n<-16`
+I am a `r n`J
 
-####Bastien
-
-Test for Gaojun
+```{r eval=TRUE, echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
+DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", header=TRUE)
+str(DataSet)
+```
 
 ###Part II: Evolution of energy mix
 
