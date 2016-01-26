@@ -28,8 +28,11 @@ Open data: https://www.data.gouv.fr/fr/datasets/electricite-consommation-product
 
 ```{r eval=TRUE, echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
 DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", header=TRUE)
-#convert Dates from numberic to date format
-as.Date(DataSet$Date,format='%m/%d/%Y')
+# create vectors with year, month, and day
+Year = Year(as.Date(DataSet$Date,format='%m/%d/%Y'))
+Month = Month(as.Date(DataSet$Date,format='%m/%d/%Y'))
+Day = Day(as.Date(DataSet$Date,format='%m/%d/%Y'))
+#Hour = Hour(as.Date(DataSet$Date,format='%m/%d/%Y'))
 ```
 The file has the following structure. It has `r nrow(DataSet)` rows and `r ncol(DataSet)` columns.
 
@@ -42,6 +45,11 @@ I am a `r n`J
 ###Part II: Evolution of energy mix
 
 
+```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+#list_of_sources=colnames(c(DataSet$Fuel,DataSet$Coal, DataSet$Gas, DataSet$Nuclear, DataSet$Wind, DataSet$Solar, DataSet$Hydro))
+#energyMixYear <-  group_by(DataSet, Year) %>% summarise(Wind = sum(Wind), Coal = sum(Coal))
+#plot(gvisSteppedAreaChart(energyMixYear,xvar = "Year", yvar = c("Wind", "Coal"), options=list(isStacked=TRUE)))
+```
 
 ####??
 
