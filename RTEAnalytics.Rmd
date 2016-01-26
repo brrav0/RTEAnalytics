@@ -1,5 +1,5 @@
 ---
-Author: "Alex, Goajun, Sergey, Bastien"
+Author: "Alex, Gaojun, Sergey, Bastien"
 ---
 
 <br>
@@ -40,6 +40,31 @@ I am a `r n`J
 ###Part III: Correlation between time of the day and solar energy production
 
 ####??
+
+### solar1 <- DataSet[,3:4]    # extract date and time columns from csv file
+### solar2 <- DataSet[,13]     # extract solar column from csv file
+### solar_data <- cbind(solar1, solar2)  # combine the three 
+
+
+```{r echo=FALSE, comment=NA, warning=FALSE, message=FALSE, results='asis'}
+### solar_data = cbind(DataSet$Date, DataSet$Time, DataSet$Solar)   # extract data
+Year <- as.Date(DataSet$Date, format = "%m%d%%Y")
+Month <- as.Date(DataSet$Date, format = "%m%d%%Y")
+Day <- as.Date(DataSet$Date, format = "%m%d%%Y")
+
+cor_solar_year <- cor(Year, DataSet$Solar)
+cor_solar_month <- cor(Month, DataSet$Solar)
+cor_solar_day <- cor(Day, DataSet$Solar)
+
+cor_solar_time <- cor(DataSet$Time, DataSet$Solar)  
+### need to transform the format of Date and Time
+
+plot(DataSet$Date, DataSet$Solar)
+plot(DataSet$Time, DataSet$Solar)
+### cor_solar1 <- cor(solar_data$Date, solar_data$So.lar) # correlation between date and solar
+### cor_solar2 <- cor(solar_data$Time, solar_data$Solar) # correlation between time and solar
+
+```
 
 ###Part IV: Correlation between time of the day and wind energy (test Sergey)
 
