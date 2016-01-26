@@ -39,8 +39,14 @@ I am a `r n`J
 ####??
 
 ###Part IV: Correlation between time of the day and wind energy (test Sergey)
+wind <- cbind(DataSet$Date,DataSet$Time,DataSet$Wind)
+Year <- year(as.Date(DataSet$Date,format="%m/%d/%Y")) 
+Month <- month(as.Date(DataSet$Date,format="%m/%d/%Y")) 
+Winter_month <-subset(DataSet$Date,Month==12,1:2)
+Spring_month <-subset(DataSet$Date,Month==3:5)
+Summer_month <-subset(DataSet$Date,Month==6:8)
+Winter_month <-subset(DataSet$Date,Month==9:11)
 
-####??
 
 ###Part V: Correlation between supply and demand vs. import/export (test Gaojun)
 
