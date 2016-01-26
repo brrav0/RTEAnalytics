@@ -46,9 +46,12 @@ I am a `r n`J
 
 
 ```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
-#list_of_sources=colnames(c(DataSet$Fuel,DataSet$Coal, DataSet$Gas, DataSet$Nuclear, DataSet$Wind, DataSet$Solar, DataSet$Hydro))
-#energyMixYear <-  group_by(DataSet, Year) %>% summarise(Wind = sum(Wind), Coal = sum(Coal))
-#plot(gvisSteppedAreaChart(energyMixYear,xvar = "Year", yvar = c("Wind", "Coal"), options=list(isStacked=TRUE)))
+list_of_sources=colnames(DataSet[9:16])
+#will try to use list_of_sources as argument to generate graphs
+
+energyMixYear <-  group_by(DataSet, Year) %>% summarise(Wind = sum(Wind), Coal = sum(Coal))
+
+#plot(gvisSteppedAreaChart(energyMixYear, yvar = c("Wind", "Coal"), options=list(isStacked=TRUE)))
 ```
 
 ####??

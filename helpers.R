@@ -11,7 +11,7 @@ get_libraries <- function(filenames_list) {
 libraries_used=c("stringr","gtools","foreign","reshape2","digest","timeDate","devtools","knitr","graphics",
                  "grDevices","xtable","sqldf","stargazer","TTR","quantmod","shiny",
                  "Hmisc","vegan","fpc","GPArotation","FactoMineR","cluster",
-                 "psych","stringr","googleVis", "png","ggplot2","googleVis", "gridExtra","RcppArmadillo","xts","DescTools")
+                 "psych","stringr","googleVis", "png","ggplot2","googleVis", "gridExtra","RcppArmadillo","xts","DescTools", "dplyr")
 
 get_libraries(libraries_used)
 
