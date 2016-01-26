@@ -21,14 +21,17 @@ Open data: https://www.data.gouv.fr/fr/datasets/electricite-consommation-product
 
 ```{r eval=TRUE, echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
 DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", header=TRUE)
+Consumption<-DataSet$Consumption
 ```
-The file has the following structure. It has `r nrow(DataSet)` rows and `r ncol(DataSet)` columns.
+The file has the following structure. It has `r nrow(DataSet)` rows and `r ncol(DataSet)` columns.<br>
 
-###Part I: Comparison between supply and demand
+###Part X: High level comments on electricity in France
+Over the last three years, the highest consumption point at one single point in time amounted to `r max(Consumption)` MegaWatts. The lowest consumption point at one single point in time amounted to `r min(Consumption)`. The highest consumption point of consumption occurred on 
+
+###Part X: Comparison between supply and demand
+
 `r n<-16`
 I am a `r n`J
-
-
 
 ###Part II: Evolution of energy mix
 
