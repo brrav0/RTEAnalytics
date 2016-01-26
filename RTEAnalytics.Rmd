@@ -1,8 +1,15 @@
 ---
-Author: "Alex, Goajun, Sergey, Bastien"
+title: "Exercise Set 2: A $300 Billion Strategy"
+author: "Alex, Goajun, Sergey, Bastien"
+output: html_document
 ---
 
 <br>
+
+```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE,error=FALSE, message=FALSE, prompt=FALSE}
+#load packages from helpers.R
+  source("helpers.R")
+```
 
 ###Background
 We have performed analysis of electricity data provided by the French Distribution Network (RTE)
@@ -21,6 +28,8 @@ Open data: https://www.data.gouv.fr/fr/datasets/electricite-consommation-product
 
 ```{r eval=TRUE, echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
 DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", header=TRUE)
+#convert Dates from numberic to date format
+as.Date(DataSet$Date,format='%m/%d/%Y')
 ```
 The file has the following structure. It has `r nrow(DataSet)` rows and `r ncol(DataSet)` columns.
 
@@ -31,6 +40,8 @@ I am a `r n`J
 
 
 ###Part II: Evolution of energy mix
+
+
 
 ####??
 
@@ -48,8 +59,4 @@ I am a `r n`J
 
 ###Part VI: Correlation between consumption and weather
 
-Test for Alex
-=======
-#test de push by ALex
 
-Test for Bastien 4:35pm
