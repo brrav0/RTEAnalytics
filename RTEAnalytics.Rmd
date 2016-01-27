@@ -1,8 +1,15 @@
 ---
-Author: "Alex, Goajun, Sergey, Bastien"
+title: "Exercise Set 2: A $300 Billion Strategy"
+author: "Alex, Goajun, Sergey, Bastien"
+output: html_document
 ---
 
 <br>
+
+```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE,error=FALSE, message=FALSE, prompt=FALSE}
+#load packages from helpers.R
+  source("helpers.R")
+```
 
 ###Background
 We have performed analysis of electricity data provided by the French Distribution Network (RTE)
@@ -22,6 +29,11 @@ Open data: https://www.data.gouv.fr/fr/datasets/electricite-consommation-product
 ```{r eval=TRUE, echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
 DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", header=TRUE)
 Consumption<-DataSet$Consumption
+# create vectors with year, month, and day
+Year = Year(as.Date(DataSet$Date,format='%m/%d/%Y'))
+Month = Month(as.Date(DataSet$Date,format='%m/%d/%Y'))
+Day = Day(as.Date(DataSet$Date,format='%m/%d/%Y'))
+#Hour = Hour(as.Date(DataSet$Date,format='%m/%d/%Y'))
 ```
 The file has the following structure. It has `r nrow(DataSet)` rows and `r ncol(DataSet)` columns.<br>
 
@@ -34,6 +46,16 @@ Over the last three years, the highest consumption point at one single point in 
 I am a `r n`J
 
 ###Part II: Evolution of energy mix
+
+
+```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+list_of_sources=colnames(DataSet[9:16])
+#will try to use list_of_sources as argument to generate graphs
+
+energyMixYear <-  group_by(DataSet, Year) %>% summarise(Wind = sum(Wind), Coal = sum(Coal))
+
+#plot(gvisSteppedAreaChart(energyMixYear, yvar = c("Wind", "Coal"), options=list(isStacked=TRUE)))
+```
 
 ####??
 
@@ -51,8 +73,4 @@ I am a `r n`J
 
 ###Part VI: Correlation between consumption and weather
 
-Test for Alex
-=======
-#test de push by ALex
 
-Test for Bastien 4:35pm
