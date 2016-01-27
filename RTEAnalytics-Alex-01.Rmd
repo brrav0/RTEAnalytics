@@ -50,7 +50,8 @@ list_of_sources=colnames(DataSet[9:16])
 #will try to use list_of_sources as argument to generate graphs
 
 energyMixYear <-  group_by(DataSet, Year) %>% summarise(Wind = sum(Wind), Coal = sum(Coal))
-
+Column <- gvisColumnChart(energyMixYear)
+plot(Column)
 #plot(gvisSteppedAreaChart(energyMixYear, yvar = c("Wind", "Coal"), options=list(isStacked=TRUE)))
 ```
 
