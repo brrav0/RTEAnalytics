@@ -29,9 +29,9 @@ Open data: https://www.data.gouv.fr/fr/datasets/electricite-consommation-product
 ```{r eval=TRUE, echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
 DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", header=TRUE)
 # create vectors with year, month, and day
-Year = Year(as.Date(DataSet$Date,format='%m/%d/%Y'))
-Month = Month(as.Date(DataSet$Date,format='%m/%d/%Y'))
-Day = Day(as.Date(DataSet$Date,format='%m/%d/%Y'))
+DataSet$Year = Year(as.Date(DataSet$Date,format='%m/%d/%Y'))
+DataSet$Month = Month(as.Date(DataSet$Date,format='%m/%d/%Y'))
+DataSet$Day = Day(as.Date(DataSet$Date,format='%m/%d/%Y'))
 #Hour = Hour(as.Date(DataSet$Date,format='%m/%d/%Y'))
 ```
 The file has the following structure. It has `r nrow(DataSet)` rows and `r ncol(DataSet)` columns.
@@ -46,13 +46,13 @@ I am a `r n`J
 
 
 ```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
-list_of_sources=colnames(DataSet[9:16])
-#will try to use list_of_sources as argument to generate graphs
+energyMixYear <-  group_by(DataSet, Year) %>% summarise(Fuel = sum(Fuel/4/1000), Coal = sum(Coal/4/1000), Gas = sum(Gas/4/1000),Nuclear = sum(Nuclear/4/1000), Wind = sum(Wind/4/1000), Solar = sum(Solar/4/1000), Hydro = sum(Hydro/4/1000), Pumping = sum(Pumping/4/1000), Bioenergy = sum(Bioenergy/4/1000))
 
-energyMixYear <-  group_by(DataSet, Year) %>% summarise(Wind = sum(Wind), Coal = sum(Coal))
-Column <- gvisColumnChart(energyMixYear)
-plot(Column)
-#plot(gvisSteppedAreaChart(energyMixYear, yvar = c("Wind", "Coal"), options=list(isStacked=TRUE)))
+#conversion to String required to use vector as x-axis in Google Charts
+energyMixYear$Year=as.character(energyMixYear$Year)
+
+#excluded pumping for now
+print(gvisSteppedAreaChart(energyMixYear, xvar = "Year", yvar = c("Fuel", "Coal", "Gas","Nuclear", "Wind", "Solar", "Hydro", "Bioenergy"), options=list(isStacked=TRUE,width = 1000, height = 500, vAxis="{format:'#,###GWh'}")), 'chart')
 ```
 
 ####??
