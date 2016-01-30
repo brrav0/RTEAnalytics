@@ -1,0 +1,124 @@
+---
+title: "RTEAnalytics-Sergey-01.Rmd"
+author: "Sergey Efimenko"
+date: "29 Jan 2016"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+
+
+
+
+
+
+##################
+ 
+Seasonality test for wind power generation.
+
+library("stringr")
+month_data = sapply(1:length(DataSet$Date), function(i) ifelse(str_length(DataSet$Date[i]) > 6, as.numeric(str_split(DataSet$Date[i], "/")[[1]][1]), NA))
+DataSet$month_data = month_data
+
+season_data = sapply(month_data, function(i){
+  if (i %in% c(11,12,1,2)) res = 1 #"Winter"
+  if (i %in% c(3,4,5)) res = 2 #"Spring"
+  if (i %in% c(6,7,8)) res = 3 #"Summer"
+  if (i %in% c(9,10)) res = 4 #"Fall"
+  res
+})
+DataSet$season_data = season_data # CAN CREATE DUMMIES IF NEEDED! JUST ADD NEW COLUMNS
+
+# check this
+# table(DataSet$season_data)
+
+# Make sure the regression data only has numeric variables (and dummies). the lm input is a data.frame
+# Make sure the regression data only has numeric variables (and dummies). the lm input is a data.frame
+regression_data = data.frame(
+  Cons = as.numeric(DataSet$Consumption), 
+  Fuel = as.numeric(DataSet$Fuel),
+  Coal = as.numeric(DataSet$Coal),
+  Gas = as.numeric(DataSet$Gas),
+  Nuclear = as.numeric(DataSet$Nuclear),
+  Wind = as.numeric(DataSet$Wind),
+  Solar = as.numeric(DataSet$Solar),
+  Hydro = as.numeric(DataSet$Hydro),
+  Pumping = as.numeric(DataSet$Pumping),
+  Bio = as.numeric(DataSet$Bioenergy),
+  Phys = as.numeric(DataSet$Physical.delivery),
+  CO2 = as.numeric(DataSet$CO2.emission),
+  Trade.UK = as.numeric(DataSet$Trade.with.UK),
+  Trade.ES = as.numeric(DataSet$Trade.with.Spain),
+  Trade.IT = as.numeric(DataSet$Trade.with.Italy),
+  Trade.SW = as.numeric(DataSet$Trade.with.Switzerland),
+  Trade.DE_BG = as.numeric(DataSet$Trade.with.Germany...Belgium),
+  Winter.d = as.numeric(ifelse(DataSet$season_data == 1, 1, 0)),
+  Spring.d = as.numeric(ifelse(DataSet$season_data == 2, 1, 0)),
+  Summer.d = as.numeric(ifelse(DataSet$season_data == 3, 1, 0)),
+  Fall.d = as.numeric(ifelse(DataSet$season_data == 4, 1, 0)),
+  Morning.d = as.numeric(ifelse(DataSet$Time %in% c("6:00", "12:00"), 1, 0)),
+  Noon.d = as.numeric(ifelse(DataSet$Time %in% c("12:00", "18:00"), 1, 0)),
+  Evening.d = as.numeric(ifelse(DataSet$Time %in% c("18:00", "0:00"), 1, 0)),
+  Night.d = as.numeric(ifelse(DataSet$Time %in% c("00:30", "6:00"), 1, 0)),
+  #We dont need the following parameters for correlation tables
+  Monthdata = as.numeric(DataSet$month_data),
+  Time = as.numeric(DataSet$Time),
+  season_data = DataSet$season_data
+
+)
+
+#Graf correlation matrix
+library(corrplot)
+corrplot(cor(regression_data[1:25]), method = "color", type="upper", order="original", tl.col="black", tl.srt=70)
+
+corrplot(cor(regression_data[1:25]), method = "number", type="upper", order="original", tl.col="black", tl.srt=70)
+
+#Table correlation matrix
+View(cor(regression_data[1:25]))
+
+
+#Regression: consumption vc season
+regression_formula_Cons.Seas = as.formula("Cons ~ Winter.d + Spring.d + Summer.d")
+Regression.Cons.Seas = lm(regression_formula_Cons.Seas, regression_data)
+Regression.Cons.Seas$coefficients
+
+
+#Regression CO2 vc Gen.Mix
+regression_formula_CO2 = as.formula("CO2 ~ Fuel + Coal + Gas + Nuclear -1")
+Regression.CO2 = lm(regression_formula_CO2, regression_data)
+Regression.CO2$coefficients
+summary(Regression.CO2)
+
+
+#Regression Wind vc Season
+regression_formula_Wind = as.formula("Wind ~ Winter.d + Spring.d + Summer.d")
+Regression.Wind = lm(regression_formula_Wind, regression_data)
+Regression.Wind$coefficients
+summary(Regression.Wind)
+
+
+#Regression Solar vc Season
+regression_formula_Solar = as.formula("Solar ~ Winter.d + Spring.d + Summer.d")
+Regression.Solar = lm(regression_formula_Solar, regression_data)
+Regression.Solar$coefficients
+(Regression.Solar)
+
+
+
+
+# This is all that the lm function returns. do help(lm)
+ls(OneRegression)
+
+
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
