@@ -1,5 +1,5 @@
 ---
-title: "Exercise Set 2: A $300 Billion Strategy"
+title: "Team project"
 author: "Alex, Goajun, Sergey, Bastien"
 output: html_document
 ---
@@ -26,9 +26,6 @@ We have performed analysis of electricity data provided by the French Distributi
 
 Open data: https://www.data.gouv.fr/fr/datasets/electricite-consommation-production-co2-et-echanges/
 
-```{r eval=TRUE, echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
-DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", header=TRUE)
-Consumption<-DataSet$Consumption
 ```
 The file has the following structure. It has `r nrow(DataSet)` rows and `r ncol(DataSet)` columns.<br>
 
@@ -56,13 +53,13 @@ I am a `r n`J
 
 ####??
 
-###Part IV: Correlation between time of the day and wind energy (test Sergey)
+###Part IV: Correlation between time of the day and wind energy
 
-####??
+####Sergey's part
 
-###Part V: Correlation between supply and demand vs. import/export (test Gaojun)
+###Part V: Correlation between supply and demand vs. import/export
 
-####??
+####Gaojun's part
 
 ###Part VI: Correlation between consumption and weather
 
