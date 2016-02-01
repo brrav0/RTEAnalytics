@@ -26,8 +26,6 @@ We have performed analysis of electricity data provided by the French Distributi
 
 Open data: https://www.data.gouv.fr/fr/datasets/electricite-consommation-production-co2-et-echanges/
 
-```
-The file has the following structure. It has `r nrow(DataSet)` rows and `r ncol(DataSet)` columns.<br>
 
 ```{r child = "RTEAnalytics-Bastien-01.Rmd"}
 ```
