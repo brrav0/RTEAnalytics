@@ -1,79 +1,17 @@
----
-title: "Exercise Set 2: A $300 Billion Strategy"
-author: "Alex, Goajun, Sergey, Bastien"
-output: html_document
----
-
-<br>
 
 ```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE,error=FALSE, message=FALSE, prompt=FALSE}
 #load packages from helpers.R
   source("helpers.R")
 ```
 
-###Background
-We have performed analysis of electricity data provided by the French Distribution Network (RTE)
-
-####Analysis
-1. Comparison between supply and demand
-2. Evolution of energy mix
-3. Correlation between time of the day and solar energy production 
-4. Correlation between time of the day and wind energy
-5. Correlation between supply and demand vs. import/export
-6. Correlation between consumption and weather
-
-####Source
-
-Open data: https://www.data.gouv.fr/fr/datasets/electricite-consommation-production-co2-et-echanges/
 
 ```{r eval=TRUE, echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
 DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", header=TRUE)
-<<<<<<< HEAD
 Consumption<-DataSet$Consumption
-=======
-# create vectors with year, month, and day
-Year = Year(as.Date(DataSet$Date,format='%m/%d/%Y'))
-Month = Month(as.Date(DataSet$Date,format='%m/%d/%Y'))
-Day = Day(as.Date(DataSet$Date,format='%m/%d/%Y'))
-#Hour = Hour(as.Date(DataSet$Date,format='%m/%d/%Y'))
->>>>>>> 1fa45162ed8f37f96c10ebb5f95a527bbf849b5d
 ```
 The file has the following structure. It has `r nrow(DataSet)` rows and `r ncol(DataSet)` columns.<br>
 
-###Part X: High level comments on electricity in France
-Over the last three years, the highest consumption point at one single point in time amounted to `r max(Consumption)` MegaWatts. The lowest consumption point at one single point in time amounted to `r min(Consumption)`. The highest consumption point of consumption occurred on 
-
-###Part X: Comparison between supply and demand
 
 `r n<-16`
 I am a `r n`J
-
-###Part II: Evolution of energy mix
-
-
-```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
-list_of_sources=colnames(DataSet[9:16])
-#will try to use list_of_sources as argument to generate graphs
-
-energyMixYear <-  group_by(DataSet, Year) %>% summarise(Wind = sum(Wind), Coal = sum(Coal))
-
-#plot(gvisSteppedAreaChart(energyMixYear, yvar = c("Wind", "Coal"), options=list(isStacked=TRUE)))
-```
-
-####??
-
-###Part III: Correlation between time of the day and solar energy production
-
-####??
-
-###Part IV: Correlation between time of the day and wind energy (test Sergey)
-
-####??
-
-###Part V: Correlation between supply and demand vs. import/export (test Gaojun)
-
-####??
-
-###Part VI: Correlation between consumption and weather
-
 
