@@ -24,6 +24,7 @@ Seasonality test for wind power generation.
 ```{r, echo=FALSE}
 library("stringr")
 library("googleVis")
+library("corrplot")
 DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", sep =",", header=TRUE)
 month_data = sapply(1:length(DataSet$Date), function(i) ifelse(str_length(DataSet$Date[i]) > 6, as.numeric(str_split(DataSet$Date[i], "/")[[1]][1]), NA))
 DataSet$month_data = month_data
@@ -44,7 +45,8 @@ table(DataSet$season_data)
 
 # Make sure the regression data only has numeric variables (and dummies). the lm input is a data.frame
 # Make sure the regression data only has numeric variables (and dummies). the lm input is a data.frame
-```{r, echo=FALSE}
+
+```{r echo=FALSE, comment=NA, warning=FALSE, message=FALSE, results='asis’}
 regression_data = data.frame(
   Cons = as.numeric(DataSet$Consumption), 
   Fuel = suppressWarnings(as.numeric(DataSet$Fuel)), # I folled google advice
@@ -80,15 +82,17 @@ regression_data = data.frame(
 ```
 
 
+
+```{r echo=TRUE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE, results='asis’}
 m1<-gvisTable(regression_data,options=list(showRowNumber=TRUE,width=1920, height=min(400,27*(nrow(regression_data)+1)),allowHTML=TRUE,page='disable'))
 print(m1,'chart')
-
 ```
 
-#Graf correlation matrix
+```{r echo=TRUE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE, results='asis’}
 library(corrplot)
 corrplot(cor(regression_data[1:25]), method = "color", type="upper", order="original", tl.col="black", tl.srt=70)
 
+```
 
 #Table correlation matrix
 View(cor(regression_data[1:25]))
