@@ -20,7 +20,11 @@ When you click the **Knit** button a document will be generated that includes bo
  
 Seasonality test for wind power generation.
 
+
+```{r, echo=FALSE}
 library("stringr")
+library("googleVis")
+DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", sep =",", header=TRUE)
 month_data = sapply(1:length(DataSet$Date), function(i) ifelse(str_length(DataSet$Date[i]) > 6, as.numeric(str_split(DataSet$Date[i], "/")[[1]][1]), NA))
 DataSet$month_data = month_data
 
@@ -32,15 +36,18 @@ season_data = sapply(month_data, function(i){
   res
 })
 DataSet$season_data = season_data # CAN CREATE DUMMIES IF NEEDED! JUST ADD NEW COLUMNS
+```
+
 
 # check this
-# table(DataSet$season_data)
+table(DataSet$season_data)
 
 # Make sure the regression data only has numeric variables (and dummies). the lm input is a data.frame
 # Make sure the regression data only has numeric variables (and dummies). the lm input is a data.frame
+```{r, echo=FALSE}
 regression_data = data.frame(
   Cons = as.numeric(DataSet$Consumption), 
-  Fuel = as.numeric(DataSet$Fuel),
+  Fuel = suppressWarnings(as.numeric(DataSet$Fuel)), # I folled google advice
   Coal = as.numeric(DataSet$Coal),
   Gas = as.numeric(DataSet$Gas),
   Nuclear = as.numeric(DataSet$Nuclear),
@@ -70,55 +77,57 @@ regression_data = data.frame(
   season_data = DataSet$season_data
 
 )
+```
+
+
+m1<-gvisTable(regression_data,options=list(showRowNumber=TRUE,width=1920, height=min(400,27*(nrow(regression_data)+1)),allowHTML=TRUE,page='disable'))
+print(m1,'chart')
+
+```
 
 #Graf correlation matrix
 library(corrplot)
 corrplot(cor(regression_data[1:25]), method = "color", type="upper", order="original", tl.col="black", tl.srt=70)
 
-corrplot(cor(regression_data[1:25]), method = "number", type="upper", order="original", tl.col="black", tl.srt=70)
 
 #Table correlation matrix
 View(cor(regression_data[1:25]))
 
 
-#Regression: consumption vc season
+#Regression1: consumption vc season
 regression_formula_Cons.Seas = as.formula("Cons ~ Winter.d + Spring.d + Summer.d")
 Regression.Cons.Seas = lm(regression_formula_Cons.Seas, regression_data)
 Regression.Cons.Seas$coefficients
 
 
-#Regression CO2 vc Gen.Mix
+#Regression2: CO2 vc Gen.Mix
 regression_formula_CO2 = as.formula("CO2 ~ Fuel + Coal + Gas + Nuclear -1")
 Regression.CO2 = lm(regression_formula_CO2, regression_data)
 Regression.CO2$coefficients
 summary(Regression.CO2)
 
 
-#Regression Wind vc Season
+#Regression3: Wind vc Season
+According to corretalition table there is a high correlation between wind farm output and season.
+Here are the results of regression analysis with dummy variables:
+```{r, echo=FALSE}
 regression_formula_Wind = as.formula("Wind ~ Winter.d + Spring.d + Summer.d")
 Regression.Wind = lm(regression_formula_Wind, regression_data)
-Regression.Wind$coefficients
-summary(Regression.Wind)
+Summary.3 <- summary(Regression.Wind)
+Fall_coef.3 <-round(coef(summary(Regression.Wind))["(Intercept)","Estimate"])
+Summer_coef.3 <-round(coef(summary(Regression.Wind))["Summer.d","Estimate"])
+Spring_coef.3 <-round(coef(summary(Regression.Wind))["Spring.d","Estimate"])
+Winter_coef.3 <-round(coef(summary(Regression.Wind))["Winter.d","Estimate"])
+```
+$Wind = `r Fall_coef.3`*Fall + `r Summer_coef.3`*Summer +`r Spring_coef.3`*Spring +`r Winter_coef.3`*Winter$
 
 
-#Regression Solar vc Season
+ 
+
+#Regression4: Solar vc Season
 regression_formula_Solar = as.formula("Solar ~ Winter.d + Spring.d + Summer.d")
 Regression.Solar = lm(regression_formula_Solar, regression_data)
 Regression.Solar$coefficients
 (Regression.Solar)
 
 
-
-
-# This is all that the lm function returns. do help(lm)
-ls(OneRegression)
-
-
-
-You can also embed plots, for example:
-
-```{r, echo=FALSE}
-plot(cars)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
