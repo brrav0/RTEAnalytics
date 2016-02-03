@@ -1,0 +1,101 @@
+---
+title: "Team project"
+author: "Alex, Gaojun, Sergey, Bastien"
+output: html_document
+---
+
+<br>
+
+```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE,error=FALSE, message=FALSE, prompt=FALSE}
+#load packages from helpers.R
+  source("helpers.R")
+```
+
+###Background
+We have performed analysis of electricity data provided by the French Distribution Network (RTE)
+
+####Analysis
+1. Comparison between supply and demand
+2. Evolution of energy mix
+3. Correlation between time of the day and solar energy production 
+4. Correlation between time of the day and wind energy
+5. Correlation between supply and demand vs. import/export
+6. Correlation between consumption and weather
+
+####Source
+
+Open data: https://www.data.gouv.fr/fr/datasets/electricite-consommation-production-co2-et-echanges/
+
+
+```{r child = "RTEAnalytics-Bastien-01.Rmd"}
+```
+
+###Part X: High level comments on electricity in France
+Over the last three years, the highest consumption point at one single point in time amounted to `r max(Consumption)` MegaWatts. The lowest consumption point at one single point in time amounted to `r min(Consumption)`. The highest consumption point of consumption occurred on 
+
+###Part X: Comparison between supply and demand
+
+`r n<-16`
+I am a `r n`J
+```{r child = "RTEAnalytics-Alex-01.Rmd"}
+```
+
+###Part II: Evolution of energy mix
+
+
+
+
+####??
+
+###Part III: Correlation between time of the day and solar energy production
+
+####??
+
+###Part IV: Correlation between time of the day and wind energy
+
+####Sergey's part
+
+###Part V: Correlation between supply and demand vs. import/export
+
+```{r eval=TRUE, echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
+DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", header=TRUE)
+```
+
+# create vectors with year, month, and day
+DataSet$Year = Year(as.Date(DataSet$Date,format='%m/%d/%Y'))
+DataSet$Month = Month(as.Date(DataSet$Date,format='%m/%d/%Y'))
+DataSet$Day = Day(as.Date(DataSet$Date,format='%m/%d/%Y'))
+Hour = Hour(as.Date(DataSet$Date,format='%m/%d/%Y'))
+
+###plot consumption per day
+supply_data = DataSet$Consumption
+
+date_data = sort(DataSet$Date, decreasing = FALSE, index.return = TRUE)
+plot(date_data, supply_data)   
+#need to re-sequence date
+
+#average monthly consumption
+consumption_month <- group_by(DataSet, Month) %>% summarise(consumption = sum(Consumption)/3)
+plot(consumption_month, xlab="Month", ylab="Monthly consumption (MWH") 
+
+#annual consumption
+consumption_year <- group_by(DataSet, Year) %>% summarise(consumption = sum(Consumption))
+plot(consumption_year, xlab="Year", ylab="Annual consumption (MWH)")
+
+
+
+
+
+###correlation between consumption and forecast
+forecast_D_1 = DataSet[,6]               ###DataSet$"Forecast D-1"
+forecast_D = DataSete[,7]               ###DataSet$"Forecast D"
+c1 <- cbind(DataSet$Consumption, DataSet[,6], DataSet[,7])
+cor_consumption <- cor(c1)     ###correlation between consumption and forecast
+
+###import/export
+c2 <- sum(as.numeric(DataSet[,19]), as.numeric(DataSet[,20]), as.numeric(DataSet[,21]), as.numeric(DataSet[,22]), as.numeric(DataSet[,23])
+plot(date_data, c2)
+
+###Part VI: Correlation between consumption and weather
+
+
