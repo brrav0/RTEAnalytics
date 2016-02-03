@@ -63,6 +63,10 @@ I am a `r n`J
 
 ####Gaojun's part
 
+```{r child = "RTEAnalytics-Gaojun-01.Rmd"}
+```
+
+
 ###Part VI: Correlation between consumption and weather
 
 
