@@ -46,7 +46,7 @@ table(DataSet$season_data)
 # Make sure the regression data only has numeric variables (and dummies). the lm input is a data.frame
 # Make sure the regression data only has numeric variables (and dummies). the lm input is a data.frame
 
-```{r echo=FALSE, comment=NA, warning=FALSE, message=FALSE, results='asis’}
+
 regression_data = data.frame(
   Cons = as.numeric(DataSet$Consumption), 
   Fuel = suppressWarnings(as.numeric(DataSet$Fuel)), # I folled google advice
