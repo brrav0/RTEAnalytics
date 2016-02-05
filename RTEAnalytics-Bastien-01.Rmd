@@ -12,6 +12,4 @@ Consumption<-DataSet$Consumption
 The file has the following structure. It has `r nrow(DataSet)` rows and `r ncol(DataSet)` columns.<br>
 
 
-`r n<-16`
-I am a `r n`J
 
