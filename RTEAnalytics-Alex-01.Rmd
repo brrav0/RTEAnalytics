@@ -1,9 +1,3 @@
----
-title: "Exercise Set 2: A $300 Billion Strategy"
-author: "Alex, Goajun, Sergey, Bastien"
-output: html_document
----
-
 <br>
 
 ```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE,error=FALSE, message=FALSE, prompt=FALSE}
@@ -11,20 +5,6 @@ output: html_document
   source("helpers.R")
 ```
 
-###Background
-We have performed analysis of electricity data provided by the French Distribution Network (RTE)
-
-####Analysis
-1. Comparison between supply and demand
-2. Evolution of energy mix
-3. Correlation between time of the day and solar energy production 
-4. Correlation between time of the day and wind energy
-5. Correlation between supply and demand vs. import/export
-6. Correlation between consumption and weather
-
-####Source
-
-Open data: https://www.data.gouv.fr/fr/datasets/electricite-consommation-production-co2-et-echanges/
 
 ```{r eval=TRUE, echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
 DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", header=TRUE)
@@ -34,41 +14,79 @@ DataSet$Month = Month(as.Date(DataSet$Date,format='%m/%d/%Y'))
 DataSet$Day = Day(as.Date(DataSet$Date,format='%m/%d/%Y'))
 #Hour = Hour(as.Date(DataSet$Date,format='%m/%d/%Y'))
 ```
+
 The file has the following structure. It has `r nrow(DataSet)` rows and `r ncol(DataSet)` columns.
-
-###Part I: Comparison between supply and demand
-`r n<-16`
-I am a `r n`J
-
 
 
 ###Part II: Evolution of energy mix
 
 
 ```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
-energyMixYear <-  group_by(DataSet, Year) %>% summarise(Fuel = sum(Fuel/4/1000), Coal = sum(Coal/4/1000), Gas = sum(Gas/4/1000),Nuclear = sum(Nuclear/4/1000), Wind = sum(Wind/4/1000), Solar = sum(Solar/4/1000), Hydro = sum(Hydro/4/1000), Pumping = sum(Pumping/4/1000), Bioenergy = sum(Bioenergy/4/1000))
+energyMixYear <-  group_by(DataSet, Year) %>% summarise(Fuel = sum(Fuel/4/1000), Coal = sum(Coal/4/1000), Gas = sum(Gas/4/1000),Nuclear = sum(Nuclear/4/1000), Wind = sum(Wind/4/1000), Solar = sum(Solar/4/1000), NetHydro = sum(Hydro/4/1000)+sum(Pumping/4/1000), Bioenergy = sum(Bioenergy/4/1000))
 
-#conversion to String required to use vector as x-axis in Google Charts
-energyMixYear$Year=as.character(energyMixYear$Year)
 
-#excluded pumping for now
-print(gvisSteppedAreaChart(energyMixYear, xvar = "Year", yvar = c("Fuel", "Coal", "Gas","Nuclear", "Wind", "Solar", "Hydro", "Bioenergy"), options=list(isStacked=TRUE,width = 1000, height = 500, vAxis="{format:'#,###GWh'}")), 'chart')
+#storing the dataframe
+energyMixYear_original = energyMixYear
+
+
+#re-arranging the dataframe so that it fits the Google Pie Chart and Table format
+rownames(energyMixYear)=energyMixYear$Year
+energyMixYear$Year = NULL
+energyMixYear=as.data.frame(round(t(energyMixYear),0))
+energyMixYear$Source=rownames(energyMixYear)
+energyMixYear = energyMixYear[,c(4,1,2,3)]
+energyMixYear = energyMixYear[order(-energyMixYear$`2014`),]
+
+energyTotals = apply(energyMixYear[,2:ncol(energyMixYear)], 2, sum)
+
 ```
 
-####??
 
-###Part III: Correlation between time of the day and solar energy production
+<br>
 
-####??
+Out of the `r format(energyTotals[ncol(energyMixYear)-1],big.mark=",",scientific=FALSE)` GWh produced on the French soil in `r energyMixYear[nrow(energyMixYear),1]`, the main energy source was `r energyMixYear$Source[1]` with `r energyMixYear[1,ncol(energyMixYear)]/energyTotals[ncol(energyMixYear)-1]*100`%.
 
-###Part IV: Correlation between time of the day and wind energy (test Sergey)
+<br>
 
-####??
+The following table shows the annual energy production broken down by energy sources.
 
-###Part V: Correlation between supply and demand vs. import/export (test Gaojun)
+<br>
 
-####??
+```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+table = gvisTable(energyMixYear)
+print(table, 'chart')
 
-###Part VI: Correlation between consumption and weather
+Pie2014 <- gvisPieChart(energyMixYear[,c(1,4)], options = list( title='2014 Energy Mix', height = 1000, width = 1000))
+#plot(Pie2014)
+print(Pie2014, 'chart')
+```
 
+
+```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+#conversion to String required to use vector as x-axis in Google Charts
+#energyMixYear$Year=as.character(energyMixYear$Year)
+
+#print(gvisSteppedAreaChart(energyMixYear, xvar = "Year", yvar = c("Pumping", "Nuclear","Hydro",  "Fuel", "Coal", "Gas", "Wind", "Solar", "Bioenergy"), options=list(isStacked=TRUE,width = 1000, height = 500, vAxis="{format:'#,###GWh'}")), 'chart')
+
+#year to year difference of energy sources
+energyMixYear = energyMixYear_original
+#stores year on year added capacity for each source of energy
+temp = diff(as.matrix(energyMixYear[,2:ncol(energyMixYear)]))
+#calculate percentage increase in each source of energy
+energyMixYearIncrease = temp / energyMixYear[1:nrow(energyMixYear)-1,2:ncol(energyMixYear)]
+colnames(energyMixYearIncrease)=colnames(energyMixYear[,2:ncol(energyMixYear)])
+
+
+#need to make period calculation automatic
+energyMixYearIncrease$Period= c("2012-2013", "2013-2014")
+
+added_energy = round(as.data.frame(t(temp)),0)
+added_energy$Source = rownames(added_energy)
+added_energy = added_energy[,c(3,1,2)]
+colnames(added_energy)[2:ncol(added_energy)]= c("2012-2013", "2013-2014")
+
+m1 = gvisTable(added_energy,options=list(width=600, height=min(400,27*(nrow(added_energy)+1)),allowHTML=TRUE,page='disable'))
+print(m1,'chart')
+#plot(m1)
+```
 
