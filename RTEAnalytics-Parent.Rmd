@@ -61,10 +61,7 @@ I am a `r n`J
 
 ###Part V: Correlation between supply and demand vs. import/export
 
-####Gaojun's part
 
-```{r child = "RTEAnalytics-Gaojun-01.Rmd"}
-```
 
 
 ###Part VI: Correlation between consumption and weather

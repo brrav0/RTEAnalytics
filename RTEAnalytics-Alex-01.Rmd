@@ -1,3 +1,6 @@
+---
+output: pdf_document
+---
 <br>
 
 ```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE,error=FALSE, message=FALSE, prompt=FALSE}
