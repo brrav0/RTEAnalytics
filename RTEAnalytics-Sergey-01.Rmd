@@ -46,7 +46,7 @@ table(DataSet$season_data)
 # Make sure the regression data only has numeric variables (and dummies). the lm input is a data.frame
 # Make sure the regression data only has numeric variables (and dummies). the lm input is a data.frame
 
-
+```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE}
 regression_data = data.frame(
   Cons = as.numeric(DataSet$Consumption), 
   Fuel = suppressWarnings(as.numeric(DataSet$Fuel)), # I folled google advice
@@ -83,15 +83,17 @@ regression_data = data.frame(
 
 
 
-```{r echo=TRUE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE, results='asis’}
-m1<-gvisTable(regression_data,options=list(showRowNumber=TRUE,width=1920, height=min(400,27*(nrow(regression_data)+1)),allowHTML=TRUE,page='disable'))
+```{r echo=TRUE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE}
+regression_table = data.frame(cor(regression_data[1:25]))
+m1<-gvisTable(regression_table,options=list(width=300, height=300,chartid, formats = NULL))
 print(m1,'chart')
 ```
 
-```{r echo=TRUE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE, results='asis’}
+
+
+```{r echo=TRUE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE}
 library(corrplot)
 corrplot(cor(regression_data[1:25]), method = "color", type="upper", order="original", tl.col="black", tl.srt=70)
-
 ```
 
 #Table correlation matrix
