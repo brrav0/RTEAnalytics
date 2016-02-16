@@ -15,12 +15,9 @@ output: html_document
 We have performed analysis of electricity data provided by the French Distribution Network (RTE)
 
 ####Analysis
-1. Comparison between supply and demand
+1. Background on electricity in France
 2. Evolution of energy mix
-3. Correlation between time of the day and solar energy production 
-4. Correlation between time of the day and wind energy
-5. Correlation between supply and demand vs. import/export
-6. Correlation between consumption and weather
+3. Correlation studies
 
 ####Source
 
@@ -30,40 +27,24 @@ Open data: https://www.data.gouv.fr/fr/datasets/electricite-consommation-product
 ```{r child = "RTEAnalytics-Bastien-01.Rmd"}
 ```
 
-###Part X: High level comments on electricity in France
+###Part 1: Background on electricity in France
 Over the last three years, the highest consumption point at one single point in time amounted to `r max(Consumption)` MegaWatts. The lowest consumption point at one single point in time amounted to `r min(Consumption)`. The highest consumption point of consumption occurred on 
 
-###Part X: Comparison between supply and demand
+```{r child = "RTEAnalytics-Bastien-02.Rmd"}
+```
 
-`r n<-16`
-I am a `r n`J
 ```{r child = "RTEAnalytics-Alex-01.Rmd"}
 ```
 
-###Part II: Evolution of energy mix
-
-
-
-
-####??
-
-###Part III: Correlation between time of the day and solar energy production
-
-####??
-
-###Part IV: Correlation between time of the day and wind energy
+###Part 3: Correlation studies
 
 ####Sergey's part
 
 ```{r child = "RTEAnalytics-Sergey-01.Rmd"}
 ```
 
-
-###Part V: Correlation between supply and demand vs. import/export
-
-
-
-
-###Part VI: Correlation between consumption and weather
-
-
+###Conclusion
+We have becomre more familiar with R by using the set of data. We have confirmed seveal of our assumptions by querying the set of data including:
+- the balance of the energy over the period under study
+- the evolution of the mix of energy over the period under study
+- various sets of correlation
