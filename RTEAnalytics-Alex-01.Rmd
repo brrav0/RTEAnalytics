@@ -18,8 +18,6 @@ DataSet$Day = Day(as.Date(DataSet$Date,format='%m/%d/%Y'))
 #Hour = Hour(as.Date(DataSet$Date,format='%m/%d/%Y'))
 ```
 
-The file has the following structure. It has `r nrow(DataSet)` rows and `r ncol(DataSet)` columns.
-
 
 ###Part II: Evolution of energy mix
 
@@ -39,57 +37,66 @@ energyMixYear=as.data.frame(round(t(energyMixYear),0))
 energyMixYear$Source=rownames(energyMixYear)
 energyMixYear = energyMixYear[,c(4,1,2,3)]
 energyMixYear = energyMixYear[order(-energyMixYear$`2014`),]
-
 energyTotals = apply(energyMixYear[,2:ncol(energyMixYear)], 2, sum)
-
 ```
 
 
 <br>
 
-Out of the `r format(energyTotals[ncol(energyMixYear)-1],big.mark=",",scientific=FALSE)` GWh produced on the French soil in `r energyMixYear[nrow(energyMixYear),1]`, the main energy source was `r energyMixYear$Source[1]` with `r energyMixYear[1,ncol(energyMixYear)]/energyTotals[ncol(energyMixYear)-1]*100`%.
+The main source of energy production in `r colnames(energyMixYear)[ncol(energyMixYear)]` was `r energyMixYear$Source[1]` with `r round(energyMixYear[1,ncol(energyMixYear)]/energyTotals[ncol(energyMixYear)-1]*100,1)`% of the `r format(energyTotals[ncol(energyMixYear)-1],big.mark=",",scientific=FALSE)` GWh produced on the French soil.
 
 <br>
 
-The following table shows the annual energy production broken down by energy sources.
+The following table shows the annual energy production broken down by energy sources, in GWh per year.
 
 <br>
 
 ```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+#need to format numbers
 table = gvisTable(energyMixYear)
 print(table, 'chart')
+```
 
-Pie2014 <- gvisPieChart(energyMixYear[,c(1,4)], options = list( title='2014 Energy Mix', height = 1000, width = 1000))
+<br>
+
+The following chart shows the share of each energy source in the production mix in `r colnames(energyMixYear)[ncol(energyMixYear)]`.
+
+<br>
+
+```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+Pie2014 <- gvisPieChart(energyMixYear[,c(1,4)], options = list( title='2014 Energy Mix', height = 400, width = 1000))
 #plot(Pie2014)
 print(Pie2014, 'chart')
 ```
 
+<br>
+
+The following table shows the increase in energy production for each energy source:
+
+<br>
 
 ```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
-#conversion to String required to use vector as x-axis in Google Charts
-#energyMixYear$Year=as.character(energyMixYear$Year)
-
-#print(gvisSteppedAreaChart(energyMixYear, xvar = "Year", yvar = c("Pumping", "Nuclear","Hydro",  "Fuel", "Coal", "Gas", "Wind", "Solar", "Bioenergy"), options=list(isStacked=TRUE,width = 1000, height = 500, vAxis="{format:'#,###GWh'}")), 'chart')
-
 #year to year difference of energy sources
 energyMixYear = energyMixYear_original
 #stores year on year added capacity for each source of energy
 temp = diff(as.matrix(energyMixYear[,2:ncol(energyMixYear)]))
 #calculate percentage increase in each source of energy
-energyMixYearIncrease = temp / energyMixYear[1:nrow(energyMixYear)-1,2:ncol(energyMixYear)]
-colnames(energyMixYearIncrease)=colnames(energyMixYear[,2:ncol(energyMixYear)])
+temp = temp / energyMixYear[1:nrow(energyMixYear)-1,2:ncol(energyMixYear)]
+colnames(temp)=colnames(energyMixYear[,2:ncol(energyMixYear)])
 
 
 #need to make period calculation automatic
-energyMixYearIncrease$Period= c("2012-2013", "2013-2014")
+#energyMixYearIncrease$Period= c("2012-2013", "2013-2014")
 
-added_energy = round(as.data.frame(t(temp)),0)
+added_energy = round(as.data.frame(t(temp)),3)
+
+colnames(added_energy)[1:ncol(added_energy)]= c("2012-2013", "2013-2014")
 added_energy$Source = rownames(added_energy)
 added_energy = added_energy[,c(3,1,2)]
-colnames(added_energy)[2:ncol(added_energy)]= c("2012-2013", "2013-2014")
 
-m1 = gvisTable(added_energy,options=list(width=600, height=min(400,27*(nrow(added_energy)+1)),allowHTML=TRUE,page='disable'))
+
+m1 = gvisTable(added_energy,options=list(width=600, height=min(400,27*(nrow(added_energy)+1)),allowHTML=TRUE,page='disable'), formats=list('2012-2013'='#.#%', '2013-2014'='#.#%'))
 print(m1,'chart')
-#plot(m1)
+plot(m1)
 ```
 
