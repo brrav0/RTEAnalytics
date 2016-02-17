@@ -1,0 +1,40 @@
+
+```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE,error=FALSE, message=FALSE, prompt=FALSE}
+#load packages from helpers.R
+  source("helpers.R")
+```
+
+
+```{r eval=TRUE, echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
+DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", header=TRUE)
+Consumption<-DataSet$Consumption
+Forecast<-DataSet$Forecast
+Difference<-Forecast - Consumption
+Date<-DataSet$Date
+max_day_coor<-which.max(Consumption)+1
+max_day<-Date[max_day_coor]
+```
+The file has the following structure. It has `r nrow(DataSet)` rows and `r ncol(DataSet)` columns.<br>
+
+The maximum consumption at one point in time in France between 2012 and 2014 was `r max(Consumption, na.rm = TRUE)` MW.
+
+This is located on row `r which.max(Consumption)+1` and happened on `r max_day`
+
+This is lower than the electrical available power which amounts to 129 310 MW as of 12/31/15.
+
+`r print(gvisLineChart(DataSet, xvar ="Date", yvar = "Consumption"),'chart')`
+```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+
+#data below works be superpatient
+print(gvisLineChart(DataSet, xvar = "Date", yvar = c("Consumption"), options=list(isStacked=TRUE,width = 1000, height = 500, vAxis="{format:'#,###GWh'}")), 'chart')
+```
+
+We want to see the correlation between the forecast and the consumption. The correlation amount to `r cor(Consumption,Forecast)`. We can conclude that the forecast is of high quality.
+
+We also wanted to compare over the last 6 month the difference between forecast and the consumption. We started by defining the appropriate dataset.
+
+```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+
+#data below works be superpatient
+print(gvisLineChart(DataSet, xvar = "Date", yvar = c("Difference"), options=list(isStacked=TRUE,width = 1000, height = 500, vAxis="{format:'#,###GWh'}")), 'chart')
+```
