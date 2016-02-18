@@ -5,20 +5,21 @@ date: "29 Jan 2016"
 output: html_document
 ---
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
- 
 
 
+##Analysys of French Energy System.
+
+The purpose of the current analysis is to interpret French Energy System data uploaded from ... The raw data contains the following information about French Energy System for every 30 minute during the period from ... untill ...:
+1. Total consumption of energy (demand) in MW (megawatts); 
+2. Generation mix that meets the demand. The generators are grouped according to the nature of energy producing units and fuel used;
+3. Net export data that describes energy flows of French Energy System and energy systems of other companies
+4. CO2 emission data recorded aggregately for all energy generators.
 
 
+Given the nature of the data the analysis will focuse on the following issues:
+1. Understanding of correlations between consumption, generation mix, CO2 emissions, net export, time of the day and season.
+2. If correlation is traced and can be explained the next step is to use linear regression models to describe the relationship between dependent and independent variables.
 
-
-##################
- 
-Seasonality test for wind power generation.
 
 
 ```{r, echo=FALSE}
@@ -36,15 +37,10 @@ season_data = sapply(month_data, function(i){
   if (i %in% c(9,10)) res = 4 #"Fall"
   res
 })
-DataSet$season_data = season_data # CAN CREATE DUMMIES IF NEEDED! JUST ADD NEW COLUMNS
+DataSet$season_data = season_data
 ```
 
-
-# check this
-table(DataSet$season_data)
-
-# Make sure the regression data only has numeric variables (and dummies). the lm input is a data.frame
-# Make sure the regression data only has numeric variables (and dummies). the lm input is a data.frame
+View(DataSet)
 
 ```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE}
 regression_data = data.frame(
@@ -82,40 +78,100 @@ regression_data = data.frame(
 ```
 
 
+#Correlation matrix analysis
 
-```{r echo=TRUE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE}
-regression_table = data.frame(cor(regression_data[1:25]))
-m1<-gvisTable(regression_table,options=list(width=300, height=300,chartid, formats = NULL))
-print(m1,'chart')
-```
-
+We used R programming language tools to construct correlation matrix for the parameters selected from the raw dataset. For better visualisation we used "Corrplot" package, that can let us trace dependencies in a convenient way. We decided to exclude from analysis the correlation coefficients that are not significant under p = 0,05. Such cells are left blank in the following diagramm: 
 
 
 ```{r echo=TRUE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE}
 library(corrplot)
-corrplot(cor(regression_data[1:25]), method = "color", type="upper", order="original", tl.col="black", tl.srt=70)
+cor.mtest <- function(mat, conf.level = 0.95) {
+    mat <- as.matrix(regression_data[1:25])
+    n <- ncol(mat)
+    p.mat <- lowCI.mat <- uppCI.mat <- matrix(NA, n, n)
+    diag(p.mat) <- 0
+    diag(lowCI.mat) <- diag(uppCI.mat) <- 1
+    for (i in 1:(n - 1)) {
+        for (j in (i + 1):n) {
+            tmp <- cor.test(mat[, i], mat[, j], conf.level = conf.level)
+            p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+            lowCI.mat[i, j] <- lowCI.mat[j, i] <- tmp$conf.int[1]
+            uppCI.mat[i, j] <- uppCI.mat[j, i] <- tmp$conf.int[2]
+        }
+    }
+    return(list(p.mat, lowCI.mat, uppCI.mat))
+}
+
+res1 <- cor.mtest(regression_data[1:25], 0.95)
+
+corrplot(cor(regression_data[1:25]),p.mat = res1[[1]], sig.level = 0.05,insig = "blank", method = "circle", type="lower", order="original", tl.col="black", tl.srt=90)
 ```
 
-#Table correlation matrix
-View(cor(regression_data[1:25]))
+The exact correlation coefficients betwenn selected parameters are given in the followng matrix:
+ 
+```{r echo=FALSE, comment=NA, warning=FALSE, message=FALSE, results='asis'}
+regression_table = data.frame(cbind(colnames(regression_data[1:25]),round(cor(regression_data[1:25]),2)))
+m1<-gvisTable(regression_table,options=list(showRowNumber=FALSE, width=1920, height=min(400,27*(nrow(regression_table)+1)),allowHTML=TRUE,page='disable'))
+print(m1,'chart')
+```
+
+As we can see from the table and diagramm above there are correlations between following variables: 
+1. Consumption and generation mix;
+2. Consumption and the season of the year;
+3. CO2 emissions and fuel-fired generators (primarily Coal and Gas);
+4. Solar energy generation and the season;
+5. Wind energy generation and the season.
+
+The correlation between consumption and generation mix seems obvious since power stations produce electricity according to the current demand load in the system. We decided not to construct the model for this relationship since similar analysis is provided in the energy mix table. Instead, we decided to futher investigate relationships from point 2 to 5.
 
 
-#Regression1: consumption vc season
+*Regression of consumption vc the season of the year*
+To find the relationship between consumption of the energy and the season we assumed that Intercept will represent consumption in Fall and used other seasons are either 1 or 0.
+The results of regression are the following:
+```{r, echo=FALSE}
 regression_formula_Cons.Seas = as.formula("Cons ~ Winter.d + Spring.d + Summer.d")
 Regression.Cons.Seas = lm(regression_formula_Cons.Seas, regression_data)
-Regression.Cons.Seas$coefficients
+Summary.1 <- summary(Regression.Cons.Seas)
+Fall_coef.1 <-round(coef(summary(Regression.Cons.Seas))["(Intercept)","Estimate"])
+Summer_coef.1 <-round(coef(summary(Regression.Cons.Seas))["Summer.d","Estimate"])
+Spring_coef.1 <-round(coef(summary(Regression.Cons.Seas))["Spring.d","Estimate"])
+Winter_coef.1 <-round(coef(summary(Regression.Cons.Seas))["Winter.d","Estimate"])
+```
+$Consumption = `r Fall_coef.1` + `r Summer_coef.1`*Summer +`r Spring_coef.1`*Spring +`r Winter_coef.1`*Winter$
 
-
-#Regression2: CO2 vc Gen.Mix
+*Regression of CO2 emissions vc fuel-fired generators (primarily Coal and Gas)*
+To understand relationship between CO2 emissions and energy generated from different sources (generation mix) we ran the following regression:
+```{r, echo=FALSE}
 regression_formula_CO2 = as.formula("CO2 ~ Fuel + Coal + Gas + Nuclear -1")
 Regression.CO2 = lm(regression_formula_CO2, regression_data)
-Regression.CO2$coefficients
+Summary.2 <- summary(Regression.CO2)
+Fuel_coef <-round(coef(summary(Regression.CO2))["Fuel","Estimate"],7)
+Coal_coef <-round(coef(summary(Regression.CO2))["Coal","Estimate"],7)
+Gas_coef <-round(coef(summary(Regression.CO2))["Gas","Estimate"],7)
+Nuclear_coef <-round(coef(summary(Regression.CO2))["Nuclear","Estimate"],7)
+```
+$CO2_emission = `r Fuel_coef`*Fuel + `r Coal_coef`*Coal +`r Gas_coef`*Gas +`r Nuclear_coef`*Nuclear$
 summary(Regression.CO2)
 
+*Regression of Solar energy generation vc the season*
+To find the relationship between solar energy generation and the season we assumed that Intercept will represent generation in Fall and used other seasons are either 1 or 0.
+The results of regression are the following:
+```{r, echo=FALSE}
+regression_formula_Solar = as.formula("Solar ~ Winter.d + Spring.d + Summer.d")
+Regression.Solar = lm(regression_formula_Solar, regression_data)
+Summary.4 <- summary(Regression.Solar)
+Fall_coef.4 <-round(coef(summary(Regression.Solar))["(Intercept)","Estimate"])
+Summer_coef.4 <-round(coef(summary(Regression.Solar))["Summer.d","Estimate"])
+Spring_coef.4 <-round(coef(summary(Regression.Solar))["Spring.d","Estimate"])
+Winter_coef.4 <-round(coef(summary(Regression.Solar))["Winter.d","Estimate"])
+```
 
-#Regression3: Wind vc Season
-According to corretalition table there is a high correlation between wind farm output and season.
-Here are the results of regression analysis with dummy variables:
+$Solar_generation = `r Fall_coef.4` + `r Summer_coef.4`*Summer +`r Spring_coef.4`*Spring +`r Winter_coef.4`*Winter$
+
+
+*Regression of Wind energy generation vc the season*
+To find the relationship between wind energy generation and the season we assumed that Intercept will represent generation in Fall and used other seasons are either 1 or 0.
+The results of regression are the following:
 ```{r, echo=FALSE}
 regression_formula_Wind = as.formula("Wind ~ Winter.d + Spring.d + Summer.d")
 Regression.Wind = lm(regression_formula_Wind, regression_data)
@@ -125,15 +181,8 @@ Summer_coef.3 <-round(coef(summary(Regression.Wind))["Summer.d","Estimate"])
 Spring_coef.3 <-round(coef(summary(Regression.Wind))["Spring.d","Estimate"])
 Winter_coef.3 <-round(coef(summary(Regression.Wind))["Winter.d","Estimate"])
 ```
-$Wind = `r Fall_coef.3`*Fall + `r Summer_coef.3`*Summer +`r Spring_coef.3`*Spring +`r Winter_coef.3`*Winter$
+$Wind_generation = `r Fall_coef.3` + `r Summer_coef.3`*Summer +`r Spring_coef.3`*Spring +`r Winter_coef.3`*Winter$
 
 
  
-
-#Regression4: Solar vc Season
-regression_formula_Solar = as.formula("Solar ~ Winter.d + Spring.d + Summer.d")
-Regression.Solar = lm(regression_formula_Solar, regression_data)
-Regression.Solar$coefficients
-(Regression.Solar)
-
 
