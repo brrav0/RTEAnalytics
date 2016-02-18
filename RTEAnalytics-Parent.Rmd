@@ -1,7 +1,7 @@
 ---
 title: "Team project"
 author: "Alex, Goajun, Sergey, Bastien"
-output: html_document
+output: pdf_document
 ---
 
 <br>
