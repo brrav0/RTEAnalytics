@@ -6,12 +6,9 @@ output: html_document
 
 <br>
 
-```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE,error=FALSE, message=FALSE, prompt=FALSE}
-#load packages from helpers.R
-  source("helpers.R")
-```
 
-###Background
+
+###Introduction
 We have performed analysis of electricity data provided by the French Distribution Network (RTE)
 
 ####Analysis
@@ -23,28 +20,11 @@ We have performed analysis of electricity data provided by the French Distributi
 
 Open data: https://www.data.gouv.fr/fr/datasets/electricite-consommation-production-co2-et-echanges/
 
-
-```{r child = "RTEAnalytics-Bastien-01.Rmd"}
-```
-
-###Part 1: Background on electricity in France
-Over the last three years, the highest consumption point at one single point in time amounted to `r max(Consumption)` MegaWatts. The lowest consumption point at one single point in time amounted to `r min(Consumption)`. The highest consumption point of consumption occurred on 
-
-```{r child = "RTEAnalytics-Bastien-02.Rmd"}
-```
-
-```{r child = "RTEAnalytics-Alex-01.Rmd"}
-```
-
-###Part 3: Correlation studies
-
-####Sergey's part
-
 ```{r child = "RTEAnalytics-Sergey-01.Rmd"}
 ```
 
 ###Conclusion
-We have becomre more familiar with R by using the set of data. We have confirmed seveal of our assumptions by querying the set of data including:
+We have become more familiar with R by using the set of data. We have confirmed seveal of our assumptions by querying the set of data including:
 - the balance of the energy over the period under study
 - the evolution of the mix of energy over the period under study
 - various sets of correlation

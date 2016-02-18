@@ -26,15 +26,15 @@ This is lower than the electrical available power which amounts to 129 310 MW as
 ```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
 
 #data below works be superpatient
-print(gvisLineChart(DataSet, xvar = "Date", yvar = c("Consumption"), options=list(isStacked=TRUE,width = 1000, height = 500, vAxis="{format:'#,###GWh'}")), 'chart')
+print(gvisLineChart(DataSet, xvar = "Date", yvar = c("Consumption"), options=list(isStacked=TRUE,width = 1000, height = 500)), 'chart')
 ```
 
-We want to see the correlation between the forecast and the consumption. The correlation amount to `r cor(Consumption,Forecast)`. We can conclude that the forecast is of high quality.
+We want to see the correlation between the forecast and the consumption. We can conclude that the forecast is of high quality.
 
 We also wanted to compare over the last 6 month the difference between forecast and the consumption. We started by defining the appropriate dataset.
 
 ```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
 
 #data below works be superpatient
-print(gvisLineChart(DataSet, xvar = "Date", yvar = c("Difference"), options=list(isStacked=TRUE,width = 1000, height = 500, vAxis="{format:'#,###GWh'}")), 'chart')
+print(gvisLineChart(DataSet, xvar = "Date", yvar = c("Difference"), options=list(isStacked=TRUE,width = 1000, height = 500)), 'chart')
 ```

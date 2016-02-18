@@ -1,13 +1,8 @@
----
-title: "RTEAnalytics-Sergey-01.Rmd"
-author: "Sergey Efimenko"
-date: "29 Jan 2016"
-output: html_document
----
 
 
 
-##Analysys of French Energy System.
+
+## Part 1 - Analysys of French Energy System.
 
 The purpose of the current analysis is to interpret French Energy System data uploaded from ... The raw data contains the following information about French Energy System for every 30 minute during the period from ... untill ...:
 1. Total consumption of energy (demand) in MW (megawatts); 
@@ -22,7 +17,7 @@ Given the nature of the data the analysis will focuse on the following issues:
 
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE}
 library("stringr")
 library("googleVis")
 library("corrplot")
@@ -40,7 +35,6 @@ season_data = sapply(month_data, function(i){
 DataSet$season_data = season_data
 ```
 
-View(DataSet)
 
 ```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE}
 regression_data = data.frame(
@@ -78,12 +72,12 @@ regression_data = data.frame(
 ```
 
 
-#Correlation matrix analysis
+##Part 2 - Correlation matrix analysis
 
 We used R programming language tools to construct correlation matrix for the parameters selected from the raw dataset. For better visualisation we used "Corrplot" package, that can let us trace dependencies in a convenient way. We decided to exclude from analysis the correlation coefficients that are not significant under p = 0,05. Such cells are left blank in the following diagramm: 
 
 
-```{r echo=TRUE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE}
+```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE}
 library(corrplot)
 cor.mtest <- function(mat, conf.level = 0.95) {
     mat <- as.matrix(regression_data[1:25])
