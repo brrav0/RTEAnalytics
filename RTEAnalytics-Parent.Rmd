@@ -1,27 +1,428 @@
 ---
 title: "Team project"
 author: "Alex, Goajun, Sergey, Bastien"
-output: pdf_document
+output: html_document
 ---
 
 <br>
 
-
+ 
 
 ###Introduction
 We have performed analysis of electricity data provided by the French Distribution Network (RTE)
 
-####Analysis
+###Analysis
 1. Background on electricity in France
-2. Evolution of energy mix
-3. Correlation studies
+2. Correlation studies
+3. Consumption patterns
+4. Imports and export 
+5. Evolution of the energy mix
 
-####Source
+
+*Source*
 
 Open data: https://www.data.gouv.fr/fr/datasets/electricite-consommation-production-co2-et-echanges/
 
-```{r child = "RTEAnalytics-Sergey-01.Rmd"}
+
+###Background on electricity in France
+
+```{r eval=TRUE, echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
+DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", header=TRUE)
+Consumption<-DataSet$Consumption
+Forecast<-DataSet$Forecast
+Difference<-Forecast - Consumption
+Date<-DataSet$Date
+max_day_coor<-which.max(Consumption)+1
+max_day<-Date[max_day_coor]
 ```
+
+The file has the following structure. It has `r nrow(DataSet)` rows and `r ncol(DataSet)` columns.<br>
+The maximum consumption at one point in time in France between 2012 and 2014 was `r max(Consumption, na.rm = TRUE)` MW.
+This is located on row `r which.max(Consumption)+1` and happened on `r max_day`. This is lower than the electrical available power which amounts to 129 310 MW as of 12/31/15.
+
+
+### Correlation studies
+
+
+```{r, echo=FALSE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE}
+library("stringr")
+library("googleVis")
+library("corrplot")
+DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", sep =",", header=TRUE)
+month_data = sapply(1:length(DataSet$Date), function(i) ifelse(str_length(DataSet$Date[i]) > 6, as.numeric(str_split(DataSet$Date[i], "/")[[1]][1]), NA))
+DataSet$month_data = month_data
+
+season_data = sapply(month_data, function(i){
+  if (i %in% c(11,12,1,2)) res = 1 #"Winter"
+  if (i %in% c(3,4,5)) res = 2 #"Spring"
+  if (i %in% c(6,7,8)) res = 3 #"Summer"
+  if (i %in% c(9,10)) res = 4 #"Fall"
+  res
+})
+DataSet$season_data = season_data
+```
+
+
+The purpose of the current analysis is to interpret French Energy System data. The raw data contains the following information about French Energy System for every 30 minute during the period from `r DataSet$Date[1]` untill `r DataSet$Date[length(DataSet$Date)]`:
+
+1. Total consumption of energy (demand) in MW (megawatts); 
+2. Generation mix that meets the demand. The generators are grouped according to the nature of energy producing units and fuel used;
+3. Net export data that describes energy flows of French Energy System and energy systems of other companies
+4. CO2 emission data recorded aggregately for all energy generators.
+
+
+Given the nature of the data the analysis will focuse on the following issues:
+1. Understanding of correlations between consumption, generation mix, CO2 emissions, net export, time of the day and season.
+2. If correlation is traced and can be explained the next step is to use linear regression models to describe the relationship between dependent and independent variables.
+
+
+
+
+```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE}
+regression_data = data.frame(
+  Cons = as.numeric(DataSet$Consumption), 
+  Fuel = suppressWarnings(as.numeric(DataSet$Fuel)), # I folled google advice
+  Coal = as.numeric(DataSet$Coal),
+  Gas = as.numeric(DataSet$Gas),
+  Nuclear = as.numeric(DataSet$Nuclear),
+  Wind = as.numeric(DataSet$Wind),
+  Solar = as.numeric(DataSet$Solar),
+  Hydro = as.numeric(DataSet$Hydro),
+  Pumping = as.numeric(DataSet$Pumping),
+  Bio = as.numeric(DataSet$Bioenergy),
+  Phys = as.numeric(DataSet$Physical.delivery),
+  CO2 = as.numeric(DataSet$CO2.emission),
+  Trade.UK = as.numeric(DataSet$Trade.with.UK),
+  Trade.ES = as.numeric(DataSet$Trade.with.Spain),
+  Trade.IT = as.numeric(DataSet$Trade.with.Italy),
+  Trade.SW = as.numeric(DataSet$Trade.with.Switzerland),
+  Trade.DE_BG = as.numeric(DataSet$Trade.with.Germany...Belgium),
+  Winter.d = as.numeric(ifelse(DataSet$season_data == 1, 1, 0)),
+  Spring.d = as.numeric(ifelse(DataSet$season_data == 2, 1, 0)),
+  Summer.d = as.numeric(ifelse(DataSet$season_data == 3, 1, 0)),
+  Fall.d = as.numeric(ifelse(DataSet$season_data == 4, 1, 0)),
+  Morning.d = as.numeric(ifelse(DataSet$Time %in% c("6:00", "12:00"), 1, 0)),
+  Noon.d = as.numeric(ifelse(DataSet$Time %in% c("12:00", "18:00"), 1, 0)),
+  Evening.d = as.numeric(ifelse(DataSet$Time %in% c("18:00", "0:00"), 1, 0)),
+  Night.d = as.numeric(ifelse(DataSet$Time %in% c("00:30", "6:00"), 1, 0)),
+  #We dont need the following parameters for correlation tables
+  Monthdata = as.numeric(DataSet$month_data),
+  Time = as.numeric(DataSet$Time),
+  season_data = DataSet$season_data
+
+)
+```
+
+
+####Correlation matrix analysis
+
+We used R programming language tools to construct correlation matrix for the parameters selected from the raw dataset. For better visualisation we used "Corrplot" package, that can let us trace dependencies in a convenient way. We decided to exclude from analysis the correlation coefficients that are not significant under p = 0,05. Such cells are left blank in the following diagramm: 
+
+
+```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE, message=FALSE}
+library(corrplot)
+cor.mtest <- function(mat, conf.level = 0.95) {
+    mat <- as.matrix(regression_data[1:25])
+    n <- ncol(mat)
+    p.mat <- lowCI.mat <- uppCI.mat <- matrix(NA, n, n)
+    diag(p.mat) <- 0
+    diag(lowCI.mat) <- diag(uppCI.mat) <- 1
+    for (i in 1:(n - 1)) {
+        for (j in (i + 1):n) {
+            tmp <- cor.test(mat[, i], mat[, j], conf.level = conf.level)
+            p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+            lowCI.mat[i, j] <- lowCI.mat[j, i] <- tmp$conf.int[1]
+            uppCI.mat[i, j] <- uppCI.mat[j, i] <- tmp$conf.int[2]
+        }
+    }
+    return(list(p.mat, lowCI.mat, uppCI.mat))
+}
+
+res1 <- cor.mtest(regression_data[1:25], 0.95)
+
+corrplot(cor(regression_data[1:25]),p.mat = res1[[1]], sig.level = 0.05,insig = "blank", method = "circle", type="lower", order="original", tl.col="black", tl.srt=90)
+```
+
+The exact correlation coefficients betwenn selected parameters are given in the followng matrix:
+ 
+```{r echo=FALSE, comment=NA, warning=FALSE, message=FALSE, results='asis'}
+regression_table = data.frame(cbind(colnames(regression_data[1:25]),round(cor(regression_data[1:25]),2)))
+m1<-gvisTable(regression_table,options=list(showRowNumber=FALSE, width=1920, height=min(400,27*(nrow(regression_table)+1)),allowHTML=TRUE,page='disable'))
+print(m1,'chart')
+```
+<br>
+As we can see from the table and diagramm above there are correlations between following variables: 
+
+1. Consumption and generation mix;
+2. Consumption and the season of the year;
+3. CO2 emissions and fuel-fired generators (primarily Coal and Gas);
+4. Solar energy generation and the season;
+5. Wind energy generation and the season.
+
+The correlation between consumption and generation mix seems obvious since power stations produce electricity according to the current demand load in the system. We decided not to construct the model for this relationship since similar analysis is provided in the energy mix table. Instead, we decided to futher investigate relationships from point 2 to 5.
+
+
+####Regression of consumption vc the season of the year
+
+To find the relationship between consumption of the energy and the season we assumed that Intercept will represent consumption in Fall and used other seasons are either 1 or 0.
+The results of regression are the following:
+```{r, echo=FALSE}
+regression_formula_Cons.Seas = as.formula("Cons ~ Winter.d + Spring.d + Summer.d")
+Regression.Cons.Seas = lm(regression_formula_Cons.Seas, regression_data)
+Summary.1 <- summary(Regression.Cons.Seas)
+Fall_coef.1 <-round(coef(summary(Regression.Cons.Seas))["(Intercept)","Estimate"])
+Summer_coef.1 <-round(coef(summary(Regression.Cons.Seas))["Summer.d","Estimate"])
+Spring_coef.1 <-round(coef(summary(Regression.Cons.Seas))["Spring.d","Estimate"])
+Winter_coef.1 <-round(coef(summary(Regression.Cons.Seas))["Winter.d","Estimate"])
+```
+$Consumption = `r Fall_coef.1` + `r Summer_coef.1`*Summer +`r Spring_coef.1`*Spring +`r Winter_coef.1`*Winter$
+
+####Regression of CO2 emissions vc fuel-fired generators (primarily Coal and Gas)
+
+To understand relationship between CO2 emissions and energy generated from different sources (generation mix) we ran the following regression:
+```{r, echo=FALSE}
+regression_formula_CO2 = as.formula("CO2 ~ Fuel + Coal + Gas + Nuclear -1")
+Regression.CO2 = lm(regression_formula_CO2, regression_data)
+Summary.2 <- summary(Regression.CO2)
+Fuel_coef <-round(coef(summary(Regression.CO2))["Fuel","Estimate"],7)
+Coal_coef <-round(coef(summary(Regression.CO2))["Coal","Estimate"],7)
+Gas_coef <-round(coef(summary(Regression.CO2))["Gas","Estimate"],7)
+Nuclear_coef <-round(coef(summary(Regression.CO2))["Nuclear","Estimate"],7)
+```
+$CO2_emission = `r Fuel_coef`*Fuel + `r Coal_coef`*Coal +`r Gas_coef`*Gas +`r Nuclear_coef`*Nuclear$
+summary(Regression.CO2)
+
+####Regression of Solar energy generation vc the season
+
+To find the relationship between solar energy generation and the season we assumed that Intercept will represent generation in Fall and used other seasons are either 1 or 0.
+The results of regression are the following:
+```{r, echo=FALSE}
+regression_formula_Solar = as.formula("Solar ~ Winter.d + Spring.d + Summer.d")
+Regression.Solar = lm(regression_formula_Solar, regression_data)
+Summary.4 <- summary(Regression.Solar)
+Fall_coef.4 <-round(coef(summary(Regression.Solar))["(Intercept)","Estimate"])
+Summer_coef.4 <-round(coef(summary(Regression.Solar))["Summer.d","Estimate"])
+Spring_coef.4 <-round(coef(summary(Regression.Solar))["Spring.d","Estimate"])
+Winter_coef.4 <-round(coef(summary(Regression.Solar))["Winter.d","Estimate"])
+```
+
+$Solar_generation = `r Fall_coef.4` + `r Summer_coef.4`*Summer +`r Spring_coef.4`*Spring +`r Winter_coef.4`*Winter$
+
+
+####Regression of Wind energy generation vc the season
+
+To find the relationship between wind energy generation and the season we assumed that Intercept will represent generation in Fall and used other seasons are either 1 or 0.
+The results of regression are the following:
+```{r, echo=FALSE}
+regression_formula_Wind = as.formula("Wind ~ Winter.d + Spring.d + Summer.d")
+Regression.Wind = lm(regression_formula_Wind, regression_data)
+Summary.3 <- summary(Regression.Wind)
+Fall_coef.3 <-round(coef(summary(Regression.Wind))["(Intercept)","Estimate"])
+Summer_coef.3 <-round(coef(summary(Regression.Wind))["Summer.d","Estimate"])
+Spring_coef.3 <-round(coef(summary(Regression.Wind))["Spring.d","Estimate"])
+Winter_coef.3 <-round(coef(summary(Regression.Wind))["Winter.d","Estimate"])
+```
+$Wind_generation = `r Fall_coef.3` + `r Summer_coef.3`*Summer +`r Spring_coef.3`*Spring +`r Winter_coef.3`*Winter$
+
+
+###Consumption patterns
+
+
+```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE,error=FALSE, message=FALSE, prompt=FALSE}
+#load packages from helpers.R
+  source("helpers.R")
+```
+
+
+```{r eval=TRUE, echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
+DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", header=TRUE) # Read data from csv file
+```
+
+```{r echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+DataSet$Year = Year(as.Date(DataSet$Date,format='%m/%d/%Y'))
+DataSet$Month = Month(as.Date(DataSet$Date,format='%m/%d/%Y'))
+DataSet$Day = Day(as.Date(DataSet$Date,format='%m/%d/%Y'))
+```
+
+
+
+#### Daily consumption in winter and summer 
+
+<br>
+The chart below shows energy needs in summer and winter. It compares the instant energy consumption on Jan 1, 2012 and Jul 1, 2012. The two curves share the same pattern however in winter, the power need is generally higher because of heating. Besides, summer in France is not very hot so there are not many air-conditioners installed which normally consumer a lot of electricity.
+<br>
+```{r echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+consumption_winter <- DataSet[1:48,5]
+consumption_summer <- DataSet[(1+48*182):(48+48*182),5] # Use 2012-01-01 and 2012-07-01
+Hour<-format( seq.POSIXt(as.POSIXct(Sys.Date()), as.POSIXct(Sys.Date()+1), by = "30 min"),
+           "%H%M", tz="GMT")
+Hour <- Hour[1:48]
+g_range <- range(30000, 60000)
+plot(factor(Hour), consumption_winter, ylim=g_range, type="1", col="red")
+lines(factor(Hour), consumption_winter, ylim=g_range, col="red")
+par(new=TRUE)
+plot(factor(Hour), consumption_summer, ylim=g_range, type="1", col="Blue")
+lines(factor(Hour), consumption_summer, ylim=g_range, col="blue")
+title(xlab="Hour", ylab="Consumption (MWH)")
+legend(7, 60000, c("Consumption in summer", "Consumption in winter"), cex=0.8, col=c("blue", "red"), pch=NA_integer_, lty=1:1)
+par(new=FALSE)   ### need to work on graph
+```
+
+<br>
+
+
+####Average monthly consumption
+
+<br>
+This chart averages the numbers from 2012 to 2014 and gets the consumption by month. As mentionned above. Seasonality is the key factor of consumption which depends on temperature. Generally, consumption in winter is 50% more than in summer.
+<br>
+```{r echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+consumption_month <- group_by(DataSet, Month) %>% summarise(consumption = sum(Consumption)/3)
+plot(consumption_month$consumption, xlab="Month", ylab="Monthly consumption (MWH)")
+lines(consumption_month$consumption)
+```
+
+<br>
+
+####Annual consumption
+
+<br>
+Annual consumption shows the consumption level each year. From the chart, we can see that there is a drop in 2014. We guess that winter in 2014 was not very cold which reduced energy consuption amount. This can be confirmed by comparing temperature in that winter or we can calucate the average consumption during that period.
+<br>
+```{r echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+consumption_year <- group_by(DataSet, Year) %>% summarise(consumption = sum(Consumption))
+a=2012:2014
+plot(factor(a), consumption_year$consumption, xlab="Year", ylab="Annual consumption (MWH)")
+```
+
+<br>
+
+####Correlation between consumption and forecast
+
+<br>
+X1 represents the actual consumption, X2 is the forecast one day before and X3 is the forecast at the same day.This correlation table tells that the forecast is more accurate when the date approches which intuitively makes sense.
+<br>
+```{r echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+forecast_D_1 = DataSet[,6]               ###DataSet$"Forecast D-1"
+forecast_D = DataSet[,7]               ###DataSet$"Forecast D"
+c1 <- cbind(DataSet$Consumption, DataSet[,6], DataSet[,7])
+cor_consumption <- cor(c1)     ###correlation between consumption and forecast
+m <- gvisTable(data.frame(cor_consumption), option = list(page = 'enable', height = 'automatic', width = 'automatic'))
+plot(m)
+print(m)
+```
+
+<br>
+
+### Import/export
+
+<br>
+```{r echo=FALSE, message=FALSE, warning=FALSE, prompt=FALSE, results='asis'}
+c3 <- as.integer(DataSet[,19])+as.integer(DataSet[,20])+as.integer(DataSet[,21])+as.integer(DataSet[,22])+as.integer(DataSet[,23])      #daily import/export volume
+x = as.Date(DataSet$Date, format("%m/%d/%Y"))
+plot(factor(x), c3, xlab="Date", ylab="Net import (MWH)") 
+```
+
+<br>
+France exports its energy production to UK, Spain, Italy, Switzerland, Germany and Belgium during normal period. Exceptionally, France imports electricity from these countries when domestic consumption is high. This chart show the import/export numbers from 2012 to 2014. The negative numbers mean that France exports electricity to other countries while the positive numbers mean that France imports electricity. We can see consumption peaks happened in winter of each year which means France needs to import electricity when the weather gets cold. We can also conclude that the installed power volume in France is not enough to meet all the needs. The occasional over-consumption will be filled by buying electricity from others countries which have more flexible energy structure compared with nuclear.
+<br>
+
+### Evolution of energy mix
+
+```{r echo=FALSE, eval=TRUE, comment=NA, warning=FALSE,error=FALSE, message=FALSE, prompt=FALSE}
+#load packages from helpers.R
+  source("helpers.R")
+```
+
+
+```{r eval=TRUE, echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
+DataSet<-read.csv("RTE - clean data 2012-2014 15-1-16.csv", header=TRUE)
+# create vectors with year, month, and day
+DataSet$Year = Year(as.Date(DataSet$Date,format='%m/%d/%Y'))
+DataSet$Month = Month(as.Date(DataSet$Date,format='%m/%d/%Y'))
+DataSet$Day = Day(as.Date(DataSet$Date,format='%m/%d/%Y'))
+#Hour = Hour(as.Date(DataSet$Date,format='%m/%d/%Y'))
+```
+
+
+```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+energyMixYear <-  group_by(DataSet, Year) %>% summarise(Fuel = sum(Fuel/4/1000), Coal = sum(Coal/4/1000), Gas = sum(Gas/4/1000),Nuclear = sum(Nuclear/4/1000), Wind = sum(Wind/4/1000), Solar = sum(Solar/4/1000), NetHydro = sum(Hydro/4/1000)+sum(Pumping/4/1000), Bioenergy = sum(Bioenergy/4/1000))
+
+
+#storing the dataframe
+energyMixYear_original = energyMixYear
+
+
+#re-arranging the dataframe so that it fits the Google Pie Chart and Table format
+rownames(energyMixYear)=energyMixYear$Year
+energyMixYear$Year = NULL
+energyMixYear=as.data.frame(round(t(energyMixYear),0))
+energyMixYear$Source=rownames(energyMixYear)
+energyMixYear = energyMixYear[,c(4,1,2,3)]
+energyMixYear = energyMixYear[order(-energyMixYear$`2014`),]
+energyTotals = apply(energyMixYear[,2:ncol(energyMixYear)], 2, sum)
+```
+
+
+<br>
+
+The main source of energy production in `r colnames(energyMixYear)[ncol(energyMixYear)]` was `r energyMixYear$Source[1]` with `r round(energyMixYear[1,ncol(energyMixYear)]/energyTotals[ncol(energyMixYear)-1]*100,1)`% of the `r format(energyTotals[ncol(energyMixYear)-1],big.mark=",",scientific=FALSE)` GWh produced on the French soil.
+
+<br>
+
+The following table shows the annual energy production broken down by energy sources, in GWh per year.
+
+<br>
+
+```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+#need to format numbers
+table = gvisTable(energyMixYear)
+print(table, 'chart')
+```
+
+<br>
+
+The following chart shows the share of each energy source in the production mix in `r colnames(energyMixYear)[ncol(energyMixYear)]`.
+
+<br>
+
+```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+Pie2014 <- gvisPieChart(energyMixYear[,c(1,4)], options = list( title='2014 Energy Mix', height = 400, width = 1000))
+#plot(Pie2014)
+print(Pie2014, 'chart')
+```
+
+<br>
+
+The following table shows the increase in energy production for each energy source:
+
+<br>
+
+```{r, echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+#year to year difference of energy sources
+energyMixYear = energyMixYear_original
+#stores year on year added capacity for each source of energy
+temp = diff(as.matrix(energyMixYear[,2:ncol(energyMixYear)]))
+#calculate percentage increase in each source of energy
+temp = temp / energyMixYear[1:nrow(energyMixYear)-1,2:ncol(energyMixYear)]
+colnames(temp)=colnames(energyMixYear[,2:ncol(energyMixYear)])
+
+
+#need to make period calculation automatic
+#energyMixYearIncrease$Period= c("2012-2013", "2013-2014")
+
+added_energy = round(as.data.frame(t(temp)),3)
+
+colnames(added_energy)[1:ncol(added_energy)]= c("2012-2013", "2013-2014")
+added_energy$Source = rownames(added_energy)
+added_energy = added_energy[,c(3,1,2)]
+
+
+m1 = gvisTable(added_energy,options=list(width=600, height=min(400,27*(nrow(added_energy)+1)),allowHTML=TRUE,page='disable'), formats=list('2012-2013'='#.#%', '2013-2014'='#.#%'))
+print(m1,'chart')
+plot(m1)
+```
+
 
 ###Conclusion
 We have become more familiar with R by using the set of data. We have confirmed seveal of our assumptions by querying the set of data including:
